@@ -28,18 +28,35 @@ export async function POST(req: Request) {
     }
 
     const isOwner = document.ownerId === user.id;
-    const isOrganizationMember = !!(document.organizationId && document.organizationId === sessionClaims.organization_id);
+    
+    // FIXED: Check if user is member of the document's organization
+    const isOrganizationMember = !!(
+        document.organizationId && 
+        sessionClaims.org_id === document.organizationId
+    );
+    
+    // Also check if document is personal and user is accessing their own
+    const isPersonalDocument = !document.organizationId && isOwner;
 
-    if(!isOwner && !isOrganizationMember) {
-        return new Response("Unauthorized", {status: 401});
+    // Allow access if: owner, organization member, or accessing own personal document
+    if(!isOwner && !isOrganizationMember && !isPersonalDocument) {
+        console.log("Access denied:", {
+            userId: user.id,
+            documentOwnerId: document.ownerId,
+            documentOrgId: document.organizationId,
+            userOrgId: sessionClaims.org_id,
+            isOwner,
+            isOrganizationMember,
+            isPersonalDocument
+        });
+        return new Response("Unauthorized", {status: 403});
     }
 
     const session = liveblocks.prepareSession(user.id, {
         userInfo: {
-            name: user.fullName || "Anonymous",
+            name: user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous",
             avatar: user.imageUrl,
         },
-
     });
 
     session.allow(room, session.FULL_ACCESS);

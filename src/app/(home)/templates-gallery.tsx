@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -9,30 +8,41 @@ import { useRouter } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import { useState } from "react";
 import { toast } from "sonner";
-export const TemplatesGallery = () => {
+
+interface TemplatesGalleryProps {
+  showPersonal?: boolean;
+}
+
+export const TemplatesGallery = ({ showPersonal = false }: TemplatesGalleryProps) => {
   const router = useRouter();
   const create = useMutation(api.documents.create);
   const [isCreating, setIsCreating] = useState(false);
 
   const onTemplateClick = (title: string, initialContent: string) => {
-  setIsCreating(true);
-  create({ title, initialContent })
-    .then((documentId) => {
-      toast.success("Document created");
-      router.push(`/documents/${documentId}`);
+    setIsCreating(true);
+    
+    // Create document in the appropriate context
+    create({ 
+      title, 
+      initialContent,
+      forcePersonal: showPersonal // Pass the personal flag
     })
-    .catch(() => toast.error("Failed to create document"))
-    .finally(() => {
-      setIsCreating(false);
-    });
-};
-
+      .then((documentId) => {
+        const context = showPersonal ? "personal" : "organization";
+        toast.success(`Document created in ${context}`);
+        router.push(`/documents/${documentId}`);
+      })
+      .catch(() => toast.error("Failed to create document"))
+      .finally(() => {
+        setIsCreating(false);
+      });
+  };
 
   return (
     <div className="bg-[#F1F3F4]">
       <div className="max-w-screen-xl mx-auto px-16 py-6 flex flex-col gap-y-4">
         <h3 className="font-medium">
-          Start a new Document
+          Start a new Document {showPersonal ? "(Personal)" : "(Organization)"}
         </h3>
       </div>
       <Carousel>
@@ -48,7 +58,6 @@ export const TemplatesGallery = () => {
                 )}>
                 <button
                   disabled={isCreating}
-                  // {/* TODO: Add proper initial content*/}
                   onClick={() => onTemplateClick(template.label, "")}
                   style={{
                     backgroundImage: `url(${template.imageUrl})`,
@@ -65,10 +74,8 @@ export const TemplatesGallery = () => {
           ))}
         </CarouselContent>
         <CarouselPrevious className="left-2 z-10 bg-white shadow-md" />
-  <CarouselNext className="right-2 z-10 bg-white shadow-md" />
+        <CarouselNext className="right-2 z-10 bg-white shadow-md" />
       </Carousel>
     </div>
   )
 }
-
-

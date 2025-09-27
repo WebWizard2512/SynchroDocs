@@ -16,17 +16,30 @@ export const create = mutation({
       throw new ConvexError("Unauthorized");
     }
 
+    console.log("📝 === CREATING DOCUMENT ===");
+    console.log("📝 User subject:", user.subject);
+    console.log("📝 User organization_id:", user.organization_id);
+    console.log("📝 Args:", args);
+
     // If forcePersonal is true, always create as personal document
     const organizationId = args.forcePersonal 
       ? undefined 
       : (user.organization_id ?? undefined) as | string | undefined;
 
-    return await ctx.db.insert("documents", {
+    console.log("📝 Final organizationId:", organizationId);
+    console.log("📝 Document type:", organizationId ? "ORGANIZATION" : "PERSONAL");
+
+    const docId = await ctx.db.insert("documents", {
       title: args.title ?? "Untitled Document",
       ownerId: user.subject,
       organizationId,
       initialContent: args.initialContent,
     });
+
+    console.log("📝 Document created with ID:", docId);
+    console.log("📝 === DOCUMENT CREATION COMPLETED ===");
+
+    return docId;
   }
 });
 
@@ -163,6 +176,18 @@ export const updateById = mutation({
 export const getById = query({
   args: { id: v.id("documents") },
   handler: async (ctx, {id}) => {
-    return await ctx.db.get(id);
+    const document = await ctx.db.get(id);
+    console.log("🔍 GetById called for:", id);
+    if (document) {
+      console.log("🔍 Document found:", {
+        id: document._id,
+        title: document.title,
+        ownerId: document.ownerId,
+        organizationId: document.organizationId
+      });
+    } else {
+      console.log("🔍 Document not found");
+    }
+    return document;
   },
 });

@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useAuth } from "@clerk/nextjs";
 
 interface TemplatesGalleryProps {
   showPersonal?: boolean;
@@ -17,9 +18,16 @@ export const TemplatesGallery = ({ showPersonal = false }: TemplatesGalleryProps
   const router = useRouter();
   const create = useMutation(api.documents.create);
   const [isCreating, setIsCreating] = useState(false);
+  const { userId, orgId } = useAuth();
 
   const onTemplateClick = (title: string, initialContent: string) => {
     setIsCreating(true);
+    
+    console.log("🎨 === TEMPLATE CLICK ===");
+    console.log("🎨 Template:", title);
+    console.log("🎨 Show Personal:", showPersonal);
+    console.log("🎨 User ID:", userId);
+    console.log("🎨 Org ID:", orgId);
     
     // Create document in the appropriate context
     create({ 
@@ -29,10 +37,18 @@ export const TemplatesGallery = ({ showPersonal = false }: TemplatesGalleryProps
     })
       .then((documentId) => {
         const context = showPersonal ? "personal" : "organization";
+        console.log("✅ Document created successfully:", {
+          documentId,
+          context,
+          navigatingTo: `/documents/${documentId}`
+        });
         toast.success(`Document created in ${context}`);
         router.push(`/documents/${documentId}`);
       })
-      .catch(() => toast.error("Failed to create document"))
+      .catch((error) => {
+        console.error("❌ Failed to create document:", error);
+        toast.error("Failed to create document");
+      })
       .finally(() => {
         setIsCreating(false);
       });

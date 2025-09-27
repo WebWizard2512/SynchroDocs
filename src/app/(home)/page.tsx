@@ -8,13 +8,13 @@ import { usePaginatedQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { DocumentsTable } from './documents-table';
 import { useSearchParam } from '@/hooks/use-search-param';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { Building2, User } from 'lucide-react';
 
 const Home = () => {
   const [search] = useSearchParam();
-  const { user } = useUser();
+  const { orgId } = useAuth();
   const [showPersonal, setShowPersonal] = useState(false);
   
   const {results, status, loadMore} = usePaginatedQuery(
@@ -24,7 +24,7 @@ const Home = () => {
   );
   
   // Check if user is in an organization
-  const isInOrganization = !!user?.organizationMemberships?.length;
+  const isInOrganization = !!orgId;
   
   return (
     <div className="min-h-screen flex flex-col">

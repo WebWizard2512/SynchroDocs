@@ -1,11 +1,19 @@
 import { useState, useRef } from "react";
 import {FaCaretDown} from "react-icons/fa";
-
+import { useStorage, useMutation } from "@liveblocks/react";
+import { LEFT_MARGIN_DEFAULT, RIGHT_MARGIN_DEFAULT } from "@/constants/margins";
 const markers = Array.from({ length: 83 }, (_, i) => i);
 
 export const Ruler = () => {
-    const [leftMargin, setLeftMargin] = useState(56);
-    const [rightMargin, setRightMargin] = useState(56);
+    const leftMarginStorage = useStorage((root) => root.leftMargin) ?? LEFT_MARGIN_DEFAULT;
+    const setLeftMargin = useMutation(({storage}, position: number) =>{
+        storage.set("leftMargin", position);
+    }, []);
+
+    const rightMarginStorage = useStorage((root) => root.rightMargin) ?? RIGHT_MARGIN_DEFAULT;
+    const setRightMargin = useMutation(({storage}, position: number) =>{
+        storage.set("rightMargin", position);
+    }, []);
 
     const[isDraggingLeft, setIsDraggingLeft] = useState(false);
     const[isDraggingRight, setIsDraggingRight] = useState(false);
@@ -31,12 +39,12 @@ export const Ruler = () => {
                 const rawPostion = Math.max(0, Math.min(PAGE_WIDTH, relativeX));
 
                 if(isDraggingLeft){
-                    const maxLeftPosition = PAGE_WIDTH - rightMargin - MINIMUM_SPACE;
+                    const maxLeftPosition = PAGE_WIDTH - rightMarginStorage - MINIMUM_SPACE;
                     const newLeftPosition = Math.min(rawPostion, maxLeftPosition);
                     setLeftMargin(newLeftPosition);
                 }
                 else if(isDraggingRight){
-                    const maxRightPosition = PAGE_WIDTH - (leftMargin + MINIMUM_SPACE);
+                    const maxRightPosition = PAGE_WIDTH - (leftMarginStorage + MINIMUM_SPACE);
                     const newRightPosition = Math.max(PAGE_WIDTH - rawPostion, 0);
                     const constrainedRightPosition = Math.min(newRightPosition, maxRightPosition);
                     setRightMargin(constrainedRightPosition);
@@ -51,11 +59,11 @@ export const Ruler = () => {
     }
 
     const handleLeftDoubleClick = () =>{
-        setLeftMargin(56);
+        setLeftMargin(LEFT_MARGIN_DEFAULT);
     }
 
     const handleRightDoubleClick = () =>{
-        setRightMargin(56);
+        setRightMargin(RIGHT_MARGIN_DEFAULT);
     }
 
     return (
@@ -69,13 +77,13 @@ export const Ruler = () => {
                 id="ruler-container"
                 className="w-full h-full relative">
                     <Marker 
-                    position={leftMargin}
+                    position={leftMarginStorage}
                     isLeft={true}
                     isDragging={isDraggingLeft}
                     onDoubleClick={handleLeftDoubleClick}
                     onMouseDown={handleLeftMouseDown}/>
                     <Marker 
-                    position={rightMargin}
+                    position={rightMarginStorage}
                     isLeft={false}
                     isDragging={isDraggingRight}
                     onDoubleClick={handleRightDoubleClick}

@@ -36,7 +36,6 @@ export async function POST(req: Request) {
         if (!userOrgId) {
             try {
                 console.log("🔍 SessionClaims org_id is undefined, checking user's organization memberships...");
-                const userWithMemberships = await clerk.users.getUser(userId);
                 
                 // Get the user's organization memberships
                 const orgMemberships = await clerk.users.getOrganizationMembershipList({
@@ -116,11 +115,15 @@ export async function POST(req: Request) {
 
         console.log("✅ ACCESS GRANTED");
         console.log("✅ Reason:", accessReason);
-
+        const name = user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous";
+        const nameToNumber = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const hue = Math.abs(nameToNumber) % 360; 
+        const color = `hsl(${hue}, 80%, 60%)`;
         const session = liveblocks.prepareSession(user.id, {
             userInfo: {
-                name: user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous",
+                name,
                 avatar: user.imageUrl,
+                color,
             },
         });
 

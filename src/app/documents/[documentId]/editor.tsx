@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import Image from "@tiptap/extension-image";
 import { Color } from '@tiptap/extension-color';
@@ -19,31 +19,37 @@ import TableHeader from "@tiptap/extension-table-header";
 import StarterKit from "@tiptap/starter-kit";
 import { useEditorStore } from "@/app/store/use-editor-store";
 import Underline from "@tiptap/extension-underline";
-import { useStorage } from "@liveblocks/react";
+import { useStorage, useMutation } from "@liveblocks/react";
 import { FontSizeExtension } from "@/extensions/font-size";
 import { LineHeightExtension } from "@/extensions/line-height";
 import { Ruler } from "./ruler";
 import { useLiveblocksExtension } from "@liveblocks/react-tiptap";
 import { Threads } from "./threads";
 import { LEFT_MARGIN_DEFAULT, RIGHT_MARGIN_DEFAULT } from "@/constants/margins";
+
 interface EditorProps {
   initialContent?: string | undefined;
-
 } 
 
 export const Editor = ({ initialContent }: EditorProps) => {
   const leftMargin = useStorage((root) => root.leftMargin) ?? LEFT_MARGIN_DEFAULT;
   const rightMargin = useStorage((root) => root.rightMargin) ?? RIGHT_MARGIN_DEFAULT;
+  const isInitialized = useRef(false);
 
   const liveblocks = useLiveblocksExtension({
-    initialContent,
+    initialContent: isInitialized.current ? undefined : initialContent,
     offlineSupport_experimental: true,
   });
+
   const { setEditor } = useEditorStore();
 
   const editor = useEditor({
     onCreate({ editor }) {
       setEditor(editor);
+      // Mark as initialized after first creation to prevent content duplication
+      if (!isInitialized.current) {
+        isInitialized.current = true;
+      }
     },
     onDestroy() {
       setEditor(null);
@@ -58,15 +64,13 @@ export const Editor = ({ initialContent }: EditorProps) => {
     extensions: [
       liveblocks,
       StarterKit.configure({
-        history:false,
+        history: false, // Disable history to let Liveblocks handle it
       }),
       LineHeightExtension,
       FontSizeExtension,
-      TextAlign.configure(
-        {
-          types: ["heading", "paragraph"]
-        }
-      ),
+      TextAlign.configure({
+        types: ["heading", "paragraph"]
+      }),
       Link.configure({
         openOnClick: false,
         autolink: true,
@@ -79,7 +83,9 @@ export const Editor = ({ initialContent }: EditorProps) => {
       Underline,
       Image,
       ImageResize,
-      Table,
+      Table.configure({
+        resizable: true,
+      }),
       TableCell,
       TableRow,
       TableHeader,
@@ -91,8 +97,16 @@ export const Editor = ({ initialContent }: EditorProps) => {
     immediatelyRender: false,
   });
 
+  // Handle margin changes
+  useEffect(() => {
+    if (editor && editor.view.dom) {
+      editor.view.dom.style.paddingLeft = `${leftMargin}px`;
+      editor.view.dom.style.paddingRight = `${rightMargin}px`;
+    }
+  }, [editor, leftMargin, rightMargin]);
+
   return (
-    <div className="size-full overflow-x-auto bg-[#F9FBFD] px-4 print: p-0 print:bg-white print:overflow-visible">
+    <div className="size-full overflow-x-auto bg-[#F9FBFD] px-4 print:p-0 print:bg-white print:overflow-visible">
       <Ruler />
       <div className="min-w-max flex justify-center w-[816px] py-4 print:py-0 mx-auto print:w-full print:min-w-0">
         <EditorContent editor={editor} />

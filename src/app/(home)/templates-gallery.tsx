@@ -6,9 +6,8 @@ import { cn } from "@/lib/utils";
 import { useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
-import { useAuth } from "@clerk/nextjs";
 
 interface TemplatesGalleryProps {
   showPersonal?: boolean;
@@ -18,41 +17,29 @@ export const TemplatesGallery = ({ showPersonal = false }: TemplatesGalleryProps
   const router = useRouter();
   const create = useMutation(api.documents.create);
   const [isCreating, setIsCreating] = useState(false);
-  const { userId, orgId } = useAuth();
 
-  const onTemplateClick = (title: string, initialContent: string) => {
+  const onTemplateClick = useCallback(async (title: string, initialContent: string) => {
+    if (isCreating) return;
+    
     setIsCreating(true);
     
-    console.log("🎨 === TEMPLATE CLICK ===");
-    console.log("🎨 Template:", title);
-    console.log("🎨 Show Personal:", showPersonal);
-    console.log("🎨 User ID:", userId);
-    console.log("🎨 Org ID:", orgId);
-    
-    // Create document in the appropriate context
-    create({ 
-      title, 
-      initialContent,
-      forcePersonal: showPersonal // Pass the personal flag
-    })
-      .then((documentId) => {
-        const context = showPersonal ? "personal" : "organization";
-        console.log("✅ Document created successfully:", {
-          documentId,
-          context,
-          navigatingTo: `/documents/${documentId}`
-        });
-        toast.success(`Document created in ${context}`);
-        router.push(`/documents/${documentId}`);
-      })
-      .catch((error) => {
-        console.error("❌ Failed to create document:", error);
-        toast.error("Failed to create document");
-      })
-      .finally(() => {
-        setIsCreating(false);
+    try {
+      const documentId = await create({ 
+        title, 
+        initialContent,
+        forcePersonal: showPersonal
       });
-  };
+      
+      const context = showPersonal ? "personal" : "organization";
+      toast.success(`Document created in ${context}`);
+      router.push(`/documents/${documentId}`);
+    } catch (error) {
+      console.error("Failed to create document:", error);
+      toast.error("Failed to create document");
+    } finally {
+      setIsCreating(false);
+    }
+  }, [create, showPersonal, router, isCreating]);
 
   return (
     <div className="bg-[#F1F3F4]">
@@ -81,7 +68,8 @@ export const TemplatesGallery = ({ showPersonal = false }: TemplatesGalleryProps
                     backgroundPosition: "center",
                     backgroundRepeat: "no-repeat"
                   }}
-                  className="size-full hover:border-blue-500 rounded-sm border hover:bg-blue-50 transition flex flex-col items-center justify-center gap-y-4 bg-white" />
+                  className="size-full hover:border-blue-500 rounded-sm border hover:bg-blue-50 transition flex flex-col items-center justify-center gap-y-4 bg-white"
+                  aria-label={`Create ${template.label}`} />
                 <p className="text-sm font-medium truncate">
                   {template.label}
                 </p>

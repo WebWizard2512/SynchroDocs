@@ -28,13 +28,13 @@ const Home = () => {
   
   return (
     <div className="min-h-screen flex flex-col">
-      <div className='fixed top-0 left-0 right-0 z-10 h-16 bg-white p-4'>
+      <div className='fixed top-0 left-0 right-0 z-10 h-16 bg-white p-2 md:p-4 border-b'>
         <Navbar />
       </div>
       <div className='mt-16'>
         {/* Add switcher when user is in organization */}
         {isInOrganization && (
-          <div className="max-w-screen-xl mx-auto px-16 py-4">
+          <div className="max-w-screen-xl mx-auto px-4 md:px-16 py-4">
             <div className="flex gap-2">
               <Button
                 onClick={() => setShowPersonal(false)}
@@ -43,7 +43,8 @@ const Home = () => {
                 className="flex items-center gap-2"
               >
                 <Building2 className="h-4 w-4" />
-                Organization
+                <span className="hidden sm:inline">Organization</span>
+                <span className="sm:hidden">Org</span>
               </Button>
               <Button
                 onClick={() => setShowPersonal(true)}
@@ -52,7 +53,8 @@ const Home = () => {
                 className="flex items-center gap-2"
               >
                 <User className="h-4 w-4" />
-                Personal
+                <span className="hidden sm:inline">Personal</span>
+                <span className="sm:hidden">Personal</span>
               </Button>
             </div>
           </div>

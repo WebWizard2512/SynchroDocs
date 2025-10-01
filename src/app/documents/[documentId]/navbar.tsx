@@ -38,7 +38,10 @@ export const Navbar = ({ data }: NavbarProps) => {
         })
         .catch(() => toast.error("Something went wrong"))
         .then((id) => {
-            router.push(`/documents/${id}`);
+            if (id) {
+                toast.success("New document created");
+                router.push(`/documents/${id}`);
+            }
         });
     };
 
@@ -57,29 +60,56 @@ export const Navbar = ({ data }: NavbarProps) => {
 
     const onSaveJSON = () => {
         if (!editor) return;
-        const content = editor.getJSON();
-        const blob = new Blob([JSON.stringify(content)], {
-            type: "application/json",
-        });
-        onDownload(blob, `${data.title}.json`);
+        try {
+            const content = editor.getJSON();
+            const blob = new Blob([JSON.stringify(content, null, 2)], {
+                type: "application/json",
+            });
+            onDownload(blob, `${data.title}.json`);
+            toast.success("Document exported as JSON");
+        } catch (error) {
+            console.error("Failed to save JSON:", error);
+            toast.error("Failed to export JSON");
+        }
     };
 
     const onSaveHTML = () => {
         if (!editor) return;
-        const content = editor.getHTML();
-        const blob = new Blob([content], {
-            type: "text/html",
-        });
-        onDownload(blob, `${data.title}.html`);
+        try {
+            const content = editor.getHTML();
+            const blob = new Blob([content], {
+                type: "text/html",
+            });
+            onDownload(blob, `${data.title}.html`);
+            toast.success("Document exported as HTML");
+        } catch (error) {
+            console.error("Failed to save HTML:", error);
+            toast.error("Failed to export HTML");
+        }
     };
 
     const onSaveText = () => {
         if (!editor) return;
-        const content = editor.getText();
-        const blob = new Blob([content], {
-            type: "text/plain",
-        });
-        onDownload(blob, `${data.title}.txt`);
+        try {
+            const content = editor.getText();
+            const blob = new Blob([content], {
+                type: "text/plain",
+            });
+            onDownload(blob, `${data.title}.txt`);
+            toast.success("Document exported as text");
+        } catch (error) {
+            console.error("Failed to save text:", error);
+            toast.error("Failed to export text");
+        }
+    };
+
+    const onPrint = () => {
+        try {
+            window.print();
+        } catch (error) {
+            console.error("Failed to print:", error);
+            toast.error("Failed to print document");
+        }
     };
 
     const MenuContent = () => (
@@ -103,7 +133,7 @@ export const Navbar = ({ data }: NavbarProps) => {
                                 <GlobeIcon className="size-4 mr-2" />
                                 HTML
                             </MenubarItem>
-                            <MenubarItem onClick={() => window.print()}>
+                            <MenubarItem onClick={onPrint}>
                                 <BsFilePdf className="size-4 mr-2" />
                                 PDF
                             </MenubarItem>
@@ -126,7 +156,13 @@ export const Navbar = ({ data }: NavbarProps) => {
                             Rename
                         </MenubarItem>
                     </RenameDialog>
-                    <RemoveDialog documentId={data._id}>
+                    <RemoveDialog 
+                        documentId={data._id}
+                        onSuccess={() => {
+                            toast.success("Document deleted");
+                            // Use replace to prevent back button issues
+                            router.replace("/");
+                        }}>
                         <MenubarItem
                             onClick={(e) => e.stopPropagation()}
                             onSelect={(e) => e.preventDefault()}>
@@ -135,7 +171,7 @@ export const Navbar = ({ data }: NavbarProps) => {
                         </MenubarItem>
                     </RemoveDialog>
                     <MenubarSeparator />
-                    <MenubarItem onClick={() => window.print()}>
+                    <MenubarItem onClick={onPrint}>
                         <PrinterIcon className="size-4 mr-2" />
                         Print
                     </MenubarItem>
@@ -146,11 +182,15 @@ export const Navbar = ({ data }: NavbarProps) => {
                     Edit
                 </MenubarTrigger>
                 <MenubarContent>
-                    <MenubarItem onClick={() => editor?.chain().focus().undo().run()}>
+                    <MenubarItem 
+                        onClick={() => editor?.chain().focus().undo().run()}
+                        disabled={!editor?.can().undo()}>
                         <Undo2Icon className="size-4 mr-2" />
                         Undo
                     </MenubarItem>
-                    <MenubarItem onClick={() => editor?.chain().focus().redo().run()}>
+                    <MenubarItem 
+                        onClick={() => editor?.chain().focus().redo().run()}
+                        disabled={!editor?.can().redo()}>
                         <Redo2Icon className="size-4 mr-2" />
                         Redo
                     </MenubarItem>

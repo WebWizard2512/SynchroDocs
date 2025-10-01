@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState } from 'react'
-import Link from 'next/link'
+import React, { useState } from 'react';
 import { Navbar } from './navbar';
 import { TemplatesGallery } from './templates-gallery';
 import { usePaginatedQuery } from 'convex/react';

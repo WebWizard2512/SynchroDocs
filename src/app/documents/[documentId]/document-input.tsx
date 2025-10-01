@@ -21,29 +21,39 @@ export const DocumentInput = ({ title, id }: DocumentInputProps) => {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const mutate = useMutation(api.documents.updateById);
+  
+  // Track the last successfully saved title
+  const lastSavedTitleRef = useRef(title);
 
   // Update local state when title prop changes
   useEffect(() => {
     setValue(title);
+    lastSavedTitleRef.current = title;
   }, [title]);
 
   const debouncedUpdate = useDebounce(
     useCallback(async (newValue: string) => {
-      if (newValue === title || !newValue.trim()) return;
+      const trimmedValue = newValue.trim();
+      
+      // Don't update if empty or same as last saved
+      if (!trimmedValue || trimmedValue === lastSavedTitleRef.current) {
+        return;
+      }
 
       setIsPending(true);
       try {
-        await mutate({ id, title: newValue.trim() });
-        toast.success("Document updated");
+        await mutate({ id, title: trimmedValue });
+        lastSavedTitleRef.current = trimmedValue;
+        // Removed toast notification to reduce noise during typing
       } catch (error) {
         console.error("Failed to update document:", error);
         toast.error("Failed to update document");
-        setValue(title); // Revert on error
+        setValue(lastSavedTitleRef.current); // Revert to last saved
       } finally {
         setIsPending(false);
       }
-    }, [id, title, mutate]),
-    500
+    }, [id, mutate]),
+    1000 // Increased debounce time to reduce API calls
   );
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,32 +65,42 @@ export const DocumentInput = ({ title, id }: DocumentInputProps) => {
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!value.trim()) {
-      setValue(title);
+    const trimmedValue = value.trim();
+    
+    if (!trimmedValue) {
+      setValue(lastSavedTitleRef.current);
+      setIsEditing(false);
+      return;
+    }
+
+    // Don't make API call if value hasn't changed
+    if (trimmedValue === lastSavedTitleRef.current) {
       setIsEditing(false);
       return;
     }
 
     setIsPending(true);
     try {
-      await mutate({ id, title: value.trim() });
-      toast.success("Document updated");
+      await mutate({ id, title: trimmedValue });
+      lastSavedTitleRef.current = trimmedValue;
+      toast.success("Document renamed");
       setIsEditing(false);
     } catch (error) {
       console.error("Failed to update document:", error);
       toast.error("Failed to update document");
-      setValue(title);
+      setValue(lastSavedTitleRef.current);
     } finally {
       setIsPending(false);
     }
-  }, [id, value, title, mutate]);
+  }, [id, value, mutate]);
 
   const handleBlur = useCallback(() => {
-    if (!value.trim()) {
-      setValue(title);
+    const trimmedValue = value.trim();
+    if (!trimmedValue) {
+      setValue(lastSavedTitleRef.current);
     }
     setIsEditing(false);
-  }, [value, title]);
+  }, [value]);
 
   const handleEdit = useCallback(() => {
     setIsEditing(true);
@@ -107,18 +127,24 @@ export const DocumentInput = ({ title, id }: DocumentInputProps) => {
             onBlur={handleBlur}
             className="absolute inset-0 text-lg text-black px-1.5 bg-transparent truncate" 
             disabled={isPending}
+            maxLength={100} // Add max length
           />
         </form>
       ) : (
         <span
           onClick={handleEdit} 
-          className="text-lg px-1.5 cursor-pointer truncate hover:bg-gray-100 rounded transition-colors"
+          className="text-lg px-1.5 cursor-pointer truncate hover:bg-gray-100 rounded transition-colors max-w-[50ch]"
           title="Click to edit title"
         >
           {title}
         </span>
       )}
-      {showError && <BsCloudSlash className="size-4 text-red-500" />}
+      {showError && (
+        <div className="flex items-center gap-1">
+          <BsCloudSlash className="size-4 text-red-500" />
+          <span className="text-xs text-red-500">Disconnected</span>
+        </div>
+      )}
       {!showError && !showLoader && <BsCloudCheck className="size-4 text-green-500" />}
       {showLoader && <LoaderIcon className="size-4 animate-spin text-muted-foreground" />}
     </div>

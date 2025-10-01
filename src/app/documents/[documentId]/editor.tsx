@@ -19,7 +19,7 @@ import TableHeader from "@tiptap/extension-table-header";
 import StarterKit from "@tiptap/starter-kit";
 import { useEditorStore } from "@/app/store/use-editor-store";
 import Underline from "@tiptap/extension-underline";
-import { useStorage, useMutation } from "@liveblocks/react";
+import { useStorage } from "@liveblocks/react";
 import { FontSizeExtension } from "@/extensions/font-size";
 import { LineHeightExtension } from "@/extensions/line-height";
 import { Ruler } from "./ruler";
@@ -34,10 +34,13 @@ interface EditorProps {
 export const Editor = ({ initialContent }: EditorProps) => {
   const leftMargin = useStorage((root) => root.leftMargin) ?? LEFT_MARGIN_DEFAULT;
   const rightMargin = useStorage((root) => root.rightMargin) ?? RIGHT_MARGIN_DEFAULT;
-  const isInitialized = useRef(false);
+  
+  // Track if content has been initialized - use ref to persist across renders
+  const hasLoadedInitialContent = useRef(false);
 
   const liveblocks = useLiveblocksExtension({
-    initialContent: isInitialized.current ? undefined : initialContent,
+    // Only load initial content if it hasn't been loaded yet
+    initialContent: hasLoadedInitialContent.current ? undefined : initialContent,
     offlineSupport_experimental: true,
   });
 
@@ -46,13 +49,17 @@ export const Editor = ({ initialContent }: EditorProps) => {
   const editor = useEditor({
     onCreate({ editor }) {
       setEditor(editor);
-      // Mark as initialized after first creation to prevent content duplication
-      if (!isInitialized.current) {
-        isInitialized.current = true;
-      }
+      // Mark content as loaded after first creation
+      hasLoadedInitialContent.current = true;
+    },
+    onUpdate({ editor }) {
+      setEditor(editor);
     },
     onDestroy() {
       setEditor(null);
+    },
+    onSelectionUpdate({ editor }) {
+      setEditor(editor);
     },
     editorProps: {
       attributes: {
@@ -75,6 +82,9 @@ export const Editor = ({ initialContent }: EditorProps) => {
         openOnClick: false,
         autolink: true,
         defaultProtocol: "https",
+        HTMLAttributes: {
+          class: "text-blue-600 underline cursor-pointer",
+        },
       }),
       Color,
       Highlight.configure({ multicolor: true }),
@@ -104,6 +114,23 @@ export const Editor = ({ initialContent }: EditorProps) => {
       editor.view.dom.style.paddingRight = `${rightMargin}px`;
     }
   }, [editor, leftMargin, rightMargin]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (editor) {
+        editor.destroy();
+      }
+    };
+  }, [editor]);
+
+  if (!editor) {
+    return (
+      <div className="size-full overflow-x-auto bg-[#F9FBFD] px-4 print:p-0 print:bg-white print:overflow-visible flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading editor...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="size-full overflow-x-auto bg-[#F9FBFD] px-4 print:p-0 print:bg-white print:overflow-visible">

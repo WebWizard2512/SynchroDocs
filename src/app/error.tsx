@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from '@/components/ui/button';
-import { error } from 'console';
 import { AlertTriangle } from 'lucide-react';
 import React from 'react'
 import Link from 'next/link';

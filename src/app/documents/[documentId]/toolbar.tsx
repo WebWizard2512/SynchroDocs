@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 import { type Level } from '@tiptap/extension-heading';
 import { type ColorResult, SketchPicker } from 'react-color';
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 

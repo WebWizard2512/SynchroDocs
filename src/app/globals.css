@@ -3,79 +3,53 @@
 @tailwind utilities;
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --background: 240 10% 98%;
+    --foreground: 240 10% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 240 10% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
+    --popover-foreground: 240 10% 10%;
+    --primary: 238 80% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 6% 10%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 328 86% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 238 80% 65%;
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 0 0% 3.9%;
+    --background: 240 10% 8%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
+    --card: 240 10% 12%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
+    --popover: 240 10% 12%;
     --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
+    --primary: 238 80% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4% 16%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 328 86% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 63% 50%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 238 80% 65%;
   }
 }
 
@@ -86,18 +60,128 @@ body {
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-.tiptap {
+/* Modern Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
 
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gradient-to-b from-primary/60 to-accent/60 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply from-primary to-accent;
+}
+
+/* Glass morphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Gradient text */
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+}
+
+/* Smooth animations */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Shimmer effect for loading */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 50%, #f0f0f0 100%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* TipTap Editor Styles */
+.tiptap {
   /* Link styles */
   a {
-    @apply text-blue-600;
-    cursor: pointer;
+    @apply text-primary underline-offset-4 cursor-pointer transition-colors;
 
     &:hover {
-      @apply underline;
+      @apply text-accent underline;
     }
   }
 
@@ -106,41 +190,52 @@ body {
     height: auto;
     margin: 1.5rem 0;
     max-width: 100%;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 
     &.ProseMirror-selectednode {
-      outline: 3px solid var(--primary);
+      outline: 3px solid hsl(var(--primary));
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
     }
   }
 
   table {
     border-collapse: collapse;
-    margin: 0;
+    margin: 1.5rem 0;
     overflow: hidden;
     table-layout: fixed;
     width: 100%;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
     td,
     th {
-      border: 1px solid black;
+      border: 1px solid hsl(var(--border));
       box-sizing: border-box;
       min-width: 1em;
-      padding: 6px 8px;
+      padding: 8px 12px;
       position: relative;
       vertical-align: top;
+      transition: background-color 0.2s;
 
       > * {
         margin-bottom: 0;
       }
+
+      &:hover {
+        @apply bg-gray-50;
+      }
     }
 
     th {
-      background-color: #C7C7C7;
-      font-weight: bold;
+      background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+      color: white;
+      font-weight: 600;
       text-align: left;
     }
 
     .selectedCell:after {
-      background: var(#959596);
+      background: rgba(99, 102, 241, 0.1);
       content: '';
       left: 0;
       right: 0;
@@ -152,7 +247,7 @@ body {
     }
 
     .column-resize-handle {
-      background-color: var(--primary);
+      @apply bg-primary;
       bottom: -2px;
       pointer-events: none;
       position: absolute;
@@ -165,6 +260,7 @@ body {
   .tableWrapper {
     margin: 1.5rem 0;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   &.resize-cursor {
@@ -172,50 +268,41 @@ body {
     cursor: col-resize;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    line-height: 1.1;
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2;
     margin-top: 2.5rem;
+    margin-bottom: 1rem;
     text-wrap: pretty;
-  }
-
-  h1,
-  h2 {
-    margin-top: 3.5rem;
-    margin-bottom: 1.5rem;
+    font-weight: 700;
+    @apply bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent;
   }
 
   h1 {
-    font-size: 1.4rem;
+    font-size: 2rem;
+    margin-top: 3rem;
   }
 
   h2 {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
   }
 
   h3 {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
   }
 
-  h4,
-  h5,
-  h6 {
-    font-size: 1rem;
+  h4, h5, h6 {
+    font-size: 1.125rem;
   }
+
   /* List styles */
-  ul,
-  ol {
+  ul, ol {
     padding: 0 1rem;
     margin: 1.25rem 1rem 1.25rem 0.4rem;
   }
 
   ul li {
     list-style-type: disc;
-
+    padding-left: 0.5rem;
 
     p {
       margin-top: 0.25em;
@@ -225,6 +312,7 @@ body {
 
   ol li {
     list-style: decimal;
+    padding-left: 0.5rem;
 
     p {
       margin-top: 0.25em;
@@ -232,18 +320,19 @@ body {
     }
   }
 
-   ul[data-type='taskList'] {
+  ul[data-type='taskList'] {
     list-style: none;
     margin-left: 0;
     padding: 0;
 
     li {
-      align-items: center;
+      align-items: flex-start;
       display: flex;
+      gap: 0.5rem;
 
       > label {
         flex: 0 0 auto;
-        margin-right: 0.5rem;
+        margin-top: 0.25rem;
         user-select: none;
       }
 
@@ -254,27 +343,29 @@ body {
 
     input[type='checkbox'] {
       cursor: pointer;
+      width: 1.2rem;
+      height: 1.2rem;
+      @apply accent-primary rounded border-gray-300 transition-colors;
     }
 
-    ul[data-type="taskList"]{
-      margin: 0;
+    ul[data-type="taskList"] {
+      margin: 0.5rem 0 0.5rem 1.5rem;
     }
   }
-  
 }
 
-/* For mobile */
+/* Liveblocks Threads Styling */
 .floating-threads {
   display: none;
 }
 
-/* For desktop */
 .anchored-threads {
   display: block;
-  max-width: 300px;
+  max-width: 320px;
   width: 100%;
   position: absolute;
-  right: 12px;
+  right: 16px;
+  top: 0;
 }
 
 @media (max-width: 640px) {
@@ -287,6 +378,126 @@ body {
   }
 }
 
+/* Radix UI Popper z-index fix */
 div[data-radix-popper-content-wrapper] {
   z-index: 50 !important;
+}
+
+/* Modern card hover effects */
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:-translate-y-1;
+}
+
+/* Gradient border */
+.gradient-border {
+  position: relative;
+  border-radius: 0.75rem;
+  padding: 2px;
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+}
+
+.gradient-border-content {
+  background: white;
+  border-radius: 0.65rem;
+}
+
+/* Print styles */
+@media print {
+  .print\\:hidden {
+    display: none !important;
+  }
+  
+  .tiptap {
+    border: none !important;
+    box-shadow: none !important;
+  }
+  
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .tiptap {
+    font-size: 16px; /* Prevent iOS zoom on focus */
+  }
+  
+  .toolbar-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  
+  .toolbar-container::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  /* Hide complex UI on mobile */
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+/* Touch-friendly tap targets */
+@media (hover: none) and (pointer: coarse) {
+  button, a, input, select, textarea {
+    min-height: 44px; /* iOS accessibility guideline */
+    min-width: 44px;
+  }
+}
+
+/* Focus visible styles for accessibility */
+*:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+/* Skeleton loading animation */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e0e0e0 20%,
+    #f0f0f0 40%,
+    #f0f0f0 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 0.5rem;
+}
+
+/* Cool button styles */
+.btn-gradient {
+  @apply bg-gradient-to-r from-primary to-accent text-white font-medium px-6 py-3 rounded-lg;
+  @apply shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300;
+  @apply relative overflow-hidden;
+}
+
+.btn-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.btn-gradient:hover::before {
+  left: 100%;
+}
+
+/* Custom selection color */
+::selection {
+  background: hsl(var(--primary) / 0.3);
+  color: hsl(var(--foreground));
+}
+
+::-moz-selection {
+  background: hsl(var(--primary) / 0.3);
+  color: hsl(var(--foreground));
 }

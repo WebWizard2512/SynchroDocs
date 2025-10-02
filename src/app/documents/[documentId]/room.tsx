@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useState, useCallback } from "react";
+import { ReactNode, useEffect, useState, useCallback, useRef } from "react";
 import { 
   LiveblocksProvider, 
   RoomProvider, 
@@ -36,26 +36,75 @@ export function Room({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [authError, setAuthError] = useState<string | null>(null);
+  const fetchAttempted = useRef(false);
+  const lastFetch = useRef<number>(0);
 
   const fetchUsers = useCallback(async () => {
+    // Prevent multiple simultaneous fetches
+    const now = Date.now();
+    if (now - lastFetch.current < 3000) {
+      return; // Wait at least 3 seconds between fetches
+    }
+    
+    lastFetch.current = now;
+    
     try {
+      console.log("Fetching users for mentions/tags...");
       const list = await getUsers();
+      console.log(`Fetched ${list.length} users:`, list.map(u => u.name));
       setUsers(list);
+      fetchAttempted.current = true;
     } catch (error) {
       console.error("Failed to fetch users:", error);
-      // Don't show error toast here as it's not critical
+      // Retry after 5 seconds if first attempt
+      if (!fetchAttempted.current) {
+        setTimeout(fetchUsers, 5000);
+      }
     }
   }, []);
 
+  // Initial fetch
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
+  // Refresh users periodically to keep mentions up to date
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log("Refreshing users list...");
+      fetchUsers();
+    }, 30000); // Refresh every 30 seconds
+    
+    return () => clearInterval(interval);
+  }, [fetchUsers]);
+
+  // Ensure users are loaded when they're empty
+  useEffect(() => {
+    if (users.length === 0 && fetchAttempted.current) {
+      console.warn("Users list is empty, retrying fetch...");
+      const timeout = setTimeout(fetchUsers, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [users.length, fetchUsers]);
+
   const resolveUsers = useCallback(({ userIds }: { userIds: string[] }): (UserInfo | undefined)[] => {
+    console.log("Resolving users for IDs:", userIds);
+    console.log("Available users:", users.length, users.map(u => ({ id: u.id, name: u.name })));
+    
     return userIds.map((userId) => {
-      const user = users.find((user) => user.id === userId);
-      if (!user) return undefined;
+      const user = users.find((u) => u.id === userId);
       
+      if (!user) {
+        console.warn(`User ${userId} not found in users list. Available:`, users.map(u => u.id));
+        // Return a placeholder instead of undefined to prevent "Anonymous"
+        return {
+          name: "Loading...",
+          avatar: "",
+          color: "#999999"
+        };
+      }
+      
+      console.log(`Resolved user ${userId} to ${user.name}`);
       return {
         name: user.name,
         avatar: user.avatar,
@@ -65,6 +114,8 @@ export function Room({ children }: { children: ReactNode }) {
   }, [users]);
 
   const resolveMentionSuggestions = useCallback(({ text }: { text: string }): string[] => {
+    console.log("Getting mention suggestions for:", text, "from", users.length, "users");
+    
     let filteredUsers = users;
 
     if (text) {
@@ -72,7 +123,10 @@ export function Room({ children }: { children: ReactNode }) {
         user.name.toLowerCase().includes(text.toLowerCase())
       );
     }
-    return filteredUsers.map((user) => user.id);
+    
+    const userIds = filteredUsers.map((user) => user.id);
+    console.log("Returning mention suggestions:", userIds.length, "users");
+    return userIds;
   }, [users]);
 
   const resolveRoomsInfo = useCallback(async ({ roomIds }: { roomIds: string[] }): Promise<RoomInfo[]> => {
@@ -104,19 +158,14 @@ export function Room({ children }: { children: ReactNode }) {
       if (response.status === 403) {
         setAuthError("You don't have permission to access this document");
         toast.error("Access denied");
-        // Redirect to home after a short delay
-        setTimeout(() => {
-          router.push("/");
-        }, 2000);
+        setTimeout(() => router.replace("/"), 2000);
         throw new Error("Access denied");
       }
 
       if (response.status === 404) {
         setAuthError("Document not found");
         toast.error("Document not found");
-        setTimeout(() => {
-          router.push("/");
-        }, 2000);
+        setTimeout(() => router.replace("/"), 2000);
         throw new Error("Document not found");
       }
 
@@ -143,16 +192,22 @@ export function Room({ children }: { children: ReactNode }) {
       
       throw error;
     }
-  }, [router, authError]);
+  }, [params.documentId, router, authError]);
 
   if (authError) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
-          <div className="text-red-600 font-semibold">{authError}</div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 to-red-100">
+        <div className="text-center space-y-6 p-8 bg-white rounded-2xl shadow-xl max-w-md">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+            <span className="text-3xl">⚠️</span>
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Access Error</h2>
+            <p className="text-red-600 font-medium">{authError}</p>
+          </div>
           <button 
-            onClick={() => router.push("/")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            onClick={() => router.replace("/")}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all font-medium">
             Go to Home
           </button>
         </div>

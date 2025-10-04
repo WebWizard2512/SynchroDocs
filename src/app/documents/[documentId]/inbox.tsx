@@ -28,7 +28,7 @@ const InboxMenu = () => {
     
     return (
         <>
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="relative">
                         <BellIcon className="size-5" />
@@ -39,16 +39,22 @@ const InboxMenu = () => {
                         )}
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-auto">
+                <DropdownMenuContent 
+                    align="end" 
+                    className="w-auto p-0"
+                    onCloseAutoFocus={(e) => e.preventDefault()}
+                >
                     {inboxNotifications && inboxNotifications.length > 0 ? (
-                        <InboxNotificationList>
-                            {inboxNotifications.map((inboxNotification) => (
-                                <InboxNotification
-                                    key={inboxNotification.id}
-                                    inboxNotification={inboxNotification}
-                                />
-                            ))}
-                        </InboxNotificationList>
+                        <div className="w-[400px]">
+                            <InboxNotificationList>
+                                {inboxNotifications.map((inboxNotification) => (
+                                    <InboxNotification
+                                        key={inboxNotification.id}
+                                        inboxNotification={inboxNotification}
+                                    />
+                                ))}
+                            </InboxNotificationList>
+                        </div>
                     ) : (
                         <div className="p-2 w-[400px] text-center text-sm text-muted-foreground">
                             No notifications

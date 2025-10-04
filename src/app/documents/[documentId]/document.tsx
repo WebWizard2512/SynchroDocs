@@ -7,7 +7,7 @@ import { Room } from './room';
 import { Preloaded, usePreloadedQuery } from 'convex/react';
 import { api } from '../../../../convex/_generated/api';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface DocumentProps {
  preloadedDocument: Preloaded<typeof api.documents.getById>;
@@ -15,15 +15,24 @@ interface DocumentProps {
 
 export const Document = ({ preloadedDocument }: DocumentProps) => {
     const router = useRouter();
+    const [error, setError] = useState(false);
     
     let document;
     try {
         document = usePreloadedQuery(preloadedDocument);
-    } catch (error) {
-        useEffect(() => {
+    } catch (err) {
+        if (!error) {
+            setError(true);
+        }
+    }
+    
+    useEffect(() => {
+        if (error) {
             router.replace('/');
-        }, [router]);
-        
+        }
+    }, [error, router]);
+    
+    if (error || !document) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center space-y-4">

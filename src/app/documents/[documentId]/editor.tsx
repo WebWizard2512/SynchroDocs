@@ -36,7 +36,6 @@ export const Editor = ({ initialContent }: EditorProps) => {
   const rightMargin = useStorage((root) => root.rightMargin) ?? RIGHT_MARGIN_DEFAULT;
   
   const liveblocks = useLiveblocksExtension({
-    initialContent,
     offlineSupport_experimental: true,
   });
 
@@ -100,6 +99,15 @@ export const Editor = ({ initialContent }: EditorProps) => {
     ],
     immediatelyRender: false,
   });
+
+  useEffect(() => {
+    if (editor && initialContent) {
+      const currentContent = editor.getText();
+      if (!currentContent || currentContent.trim() === '') {
+        editor.commands.setContent(initialContent);
+      }
+    }
+  }, [editor, initialContent]);
 
   useEffect(() => {
     if (editor && editor.view.dom) {

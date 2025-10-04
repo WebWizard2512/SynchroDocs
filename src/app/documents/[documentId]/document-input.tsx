@@ -21,11 +21,8 @@ export const DocumentInput = ({ title, id }: DocumentInputProps) => {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const mutate = useMutation(api.documents.updateById);
-  
-  // Track the last successfully saved title
   const lastSavedTitleRef = useRef(title);
 
-  // Update local state when title prop changes
   useEffect(() => {
     setValue(title);
     lastSavedTitleRef.current = title;
@@ -35,7 +32,6 @@ export const DocumentInput = ({ title, id }: DocumentInputProps) => {
     useCallback(async (newValue: string) => {
       const trimmedValue = newValue.trim();
       
-      // Don't update if empty or same as last saved
       if (!trimmedValue || trimmedValue === lastSavedTitleRef.current) {
         return;
       }
@@ -44,16 +40,14 @@ export const DocumentInput = ({ title, id }: DocumentInputProps) => {
       try {
         await mutate({ id, title: trimmedValue });
         lastSavedTitleRef.current = trimmedValue;
-        // Removed toast notification to reduce noise during typing
       } catch (error) {
-        console.error("Failed to update document:", error);
         toast.error("Failed to update document");
-        setValue(lastSavedTitleRef.current); // Revert to last saved
+        setValue(lastSavedTitleRef.current);
       } finally {
         setIsPending(false);
       }
     }, [id, mutate]),
-    1000 // Increased debounce time to reduce API calls
+    1000
   );
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,7 +67,6 @@ export const DocumentInput = ({ title, id }: DocumentInputProps) => {
       return;
     }
 
-    // Don't make API call if value hasn't changed
     if (trimmedValue === lastSavedTitleRef.current) {
       setIsEditing(false);
       return;
@@ -86,7 +79,6 @@ export const DocumentInput = ({ title, id }: DocumentInputProps) => {
       toast.success("Document renamed");
       setIsEditing(false);
     } catch (error) {
-      console.error("Failed to update document:", error);
       toast.error("Failed to update document");
       setValue(lastSavedTitleRef.current);
     } finally {
@@ -116,7 +108,7 @@ export const DocumentInput = ({ title, id }: DocumentInputProps) => {
   return (
     <div className="flex items-center gap-2">
       {isEditing ? (
-        <form onSubmit={handleSubmit} className="relative w-full max-w-[50ch]">
+        <form onSubmit={handleSubmit} className="relative w-fit max-w-[50ch]">
           <span className="invisible text-lg px-1.5 whitespace-pre">
             {value || " "}
           </span>
@@ -127,23 +119,19 @@ export const DocumentInput = ({ title, id }: DocumentInputProps) => {
             onBlur={handleBlur}
             className="absolute inset-0 text-lg text-black px-1.5 bg-transparent truncate" 
             disabled={isPending}
-            maxLength={100} // Add max length
+            maxLength={100}
           />
         </form>
       ) : (
         <span
           onClick={handleEdit} 
           className="text-lg px-1.5 cursor-pointer truncate hover:bg-gray-100 rounded transition-colors max-w-[50ch]"
-          title="Click to edit title"
         >
           {title}
         </span>
       )}
       {showError && (
-        <div className="flex items-center gap-1">
-          <BsCloudSlash className="size-4 text-red-500" />
-          <span className="text-xs text-red-500">Disconnected</span>
-        </div>
+        <BsCloudSlash className="size-4 text-red-500" />
       )}
       {!showError && !showLoader && <BsCloudCheck className="size-4 text-green-500" />}
       {showLoader && <LoaderIcon className="size-4 animate-spin text-muted-foreground" />}

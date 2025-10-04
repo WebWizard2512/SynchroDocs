@@ -5,7 +5,7 @@ import {
   FloatingThreads,
 } from "@liveblocks/react-tiptap";
 import { Editor } from "@tiptap/react";
-import { useThreads } from "@liveblocks/react";
+import { useThreads } from "@liveblocks/react/suspense";
 
 export const Threads = ({ editor }: { editor: Editor | null }) => {
   if (!editor) return null;
@@ -18,13 +18,9 @@ export const Threads = ({ editor }: { editor: Editor | null }) => {
 }
 
 function ThreadsList({ editor }: { editor: Editor | null }) {
-  const { threads, error, isLoading } = useThreads({ 
+  const { threads } = useThreads({ 
     query: { resolved: false } 
   });
-
-  if (isLoading || error) {
-    return null;
-  }
 
   if (!editor) return null;
 

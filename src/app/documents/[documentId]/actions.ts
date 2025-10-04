@@ -22,22 +22,18 @@ export async function getUsers() {
     const clerk = await clerkClient();
     
     try {
-        // Always include the current user first
         const currentUser = await clerk.users.getUser(userId);
         const allUsersMap = new Map<string, User>();
         
-        // Add current user
         allUsersMap.set(currentUser.id, currentUser);
 
-        // If user is in an organization, fetch organization members
         if (sessionClaims?.org_id) {
             try {
                 const orgMembers = await clerk.organizations.getOrganizationMembershipList({
                     organizationId: sessionClaims.org_id as string,
-                    limit: 100 // Increased limit
+                    limit: 100
                 });
 
-                // Fetch all member details
                 const memberPromises = orgMembers.data.map(async (member) => {
                     try {
                         if (!member.publicUserData?.userId) {
@@ -46,25 +42,22 @@ export async function getUsers() {
                         const user = await clerk.users.getUser(member.publicUserData.userId);
                         return user;
                     } catch (error) {
-                        console.error(`Failed to fetch user ${member.publicUserData?.userId}:`, error);
                         return null;
                     }
                 });
 
                 const memberUsers = await Promise.all(memberPromises);
 
-                // Add all valid org members to the map
                 memberUsers.forEach(user => {
                     if (user) {
                         allUsersMap.set(user.id, user);
                     }
                 });
             } catch (orgError) {
-                console.error("Failed to fetch org members:", orgError);
+                // Silently continue
             }
         }
 
-        // Also try to get users from recent organization memberships if not currently in an org
         if (!sessionClaims?.org_id) {
             try {
                 const userOrgMemberships = await clerk.users.getOrganizationMembershipList({
@@ -72,7 +65,6 @@ export async function getUsers() {
                     limit: 10
                 });
 
-                // Get members from all organizations the user belongs to
                 for (const membership of userOrgMemberships.data) {
                     try {
                         const orgMembers = await clerk.organizations.getOrganizationMembershipList({
@@ -98,22 +90,18 @@ export async function getUsers() {
                             }
                         });
                     } catch {
-                        // Skip organizations we can't access
                         continue;
                     }
                 }
             } catch (error) {
-                console.error("Failed to fetch user org memberships:", error);
+                // Silently continue
             }
         }
 
-        // Convert map to array and transform to expected format
         const users = Array.from(allUsersMap.values()).map((user) => {
             const name = user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous";
-            
-            // Generate consistent color for each user based on their ID
             const nameToNumber = (user.id + name).split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-            const hue = Math.abs(nameToNumber) % 360;
+            const hue = Math.abs(nameToNumber) % 360; 
             const color = `hsl(${hue}, 80%, 60%)`;
             
             return {
@@ -126,7 +114,6 @@ export async function getUsers() {
         
         return users;
     } catch (error) {
-        console.error("Failed to fetch users:", error);
         return [];
     }
 }

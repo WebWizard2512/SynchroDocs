@@ -1,6 +1,7 @@
 "use client";
+
 import { BellIcon } from "lucide-react";
-import { useInboxNotifications } from "@liveblocks/react"; 
+import { useInboxNotifications } from "@liveblocks/react/suspense"; 
 import { InboxNotification, InboxNotificationList } from "@liveblocks/react-ui";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -23,30 +24,7 @@ export const Inbox = () => {
 }
 
 const InboxMenu = () => {
-    const { inboxNotifications, error, isLoading } = useInboxNotifications();
-    
-    if (isLoading) {
-        return (
-            <>
-                <Button variant="ghost" disabled size="icon" className="relative">
-                    <BellIcon className="size-5 animate-pulse" />
-                </Button>
-                <Separator orientation="vertical" className="h-6" />
-            </>
-        );
-    }
-    
-    // Handle errors silently (notifications not initialized yet)
-    if (error) {
-        return (
-            <>
-                <Button variant="ghost" disabled size="icon" className="relative">
-                    <BellIcon className="size-5" />
-                </Button>
-                <Separator orientation="vertical" className="h-6" />
-            </>
-        );
-    }
+    const { inboxNotifications } = useInboxNotifications();
     
     return (
         <>

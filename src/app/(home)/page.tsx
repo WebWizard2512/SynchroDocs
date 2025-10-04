@@ -27,39 +27,38 @@ const Home = () => {
   
   return (
     <div className="min-h-screen flex flex-col">
-      <div className='fixed top-0 left-0 right-0 z-10 h-16 bg-white p-2 md:p-4 border-b'>
+      <div className='fixed top-0 left-0 right-0 z-10 h-16 bg-white p-4'>
         <Navbar />
       </div>
       <div className='mt-16'>
-        {/* Add switcher when user is in organization */}
+        <TemplatesGallery showPersonal={showPersonal} />
+        
+        {/* Document switcher when in organization */}
         {isInOrganization && (
-          <div className="max-w-screen-xl mx-auto px-4 md:px-16 py-4">
-            <div className="flex gap-2">
+          <div className="max-w-screen-xl mx-auto px-16 pt-6 pb-2">
+            <div className="flex gap-2 items-center">
               <Button
                 onClick={() => setShowPersonal(false)}
-                variant={!showPersonal ? "default" : "outline"}
+                variant={!showPersonal ? "default" : "ghost"}
                 size="sm"
-                className="flex items-center gap-2"
+                className="gap-2"
               >
                 <Building2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Organization</span>
-                <span className="sm:hidden">Org</span>
+                Organization
               </Button>
               <Button
                 onClick={() => setShowPersonal(true)}
-                variant={showPersonal ? "default" : "outline"}
+                variant={showPersonal ? "default" : "ghost"}
                 size="sm"
-                className="flex items-center gap-2"
+                className="gap-2"
               >
                 <User className="h-4 w-4" />
-                <span className="hidden sm:inline">Personal</span>
-                <span className="sm:hidden">Personal</span>
+                Personal
               </Button>
             </div>
           </div>
         )}
         
-        <TemplatesGallery showPersonal={showPersonal} />
         <DocumentsTable
           documents={results}
           loadMore={loadMore}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import Image from "@tiptap/extension-image";
 import { Color } from '@tiptap/extension-color';
@@ -35,12 +35,8 @@ export const Editor = ({ initialContent }: EditorProps) => {
   const leftMargin = useStorage((root) => root.leftMargin) ?? LEFT_MARGIN_DEFAULT;
   const rightMargin = useStorage((root) => root.rightMargin) ?? RIGHT_MARGIN_DEFAULT;
   
-  // Track if content has been initialized - use ref to persist across renders
-  const hasLoadedInitialContent = useRef(false);
-
   const liveblocks = useLiveblocksExtension({
-    // Only load initial content if it hasn't been loaded yet
-    initialContent: hasLoadedInitialContent.current ? undefined : initialContent,
+    initialContent,
     offlineSupport_experimental: true,
   });
 
@@ -49,8 +45,6 @@ export const Editor = ({ initialContent }: EditorProps) => {
   const editor = useEditor({
     onCreate({ editor }) {
       setEditor(editor);
-      // Mark content as loaded after first creation
-      hasLoadedInitialContent.current = true;
     },
     onUpdate({ editor }) {
       setEditor(editor);
@@ -71,7 +65,7 @@ export const Editor = ({ initialContent }: EditorProps) => {
     extensions: [
       liveblocks,
       StarterKit.configure({
-        history: false, // Disable history to let Liveblocks handle it
+        history: false,
       }),
       LineHeightExtension,
       FontSizeExtension,
@@ -107,7 +101,6 @@ export const Editor = ({ initialContent }: EditorProps) => {
     immediatelyRender: false,
   });
 
-  // Handle margin changes
   useEffect(() => {
     if (editor && editor.view.dom) {
       editor.view.dom.style.paddingLeft = `${leftMargin}px`;
@@ -115,7 +108,6 @@ export const Editor = ({ initialContent }: EditorProps) => {
     }
   }, [editor, leftMargin, rightMargin]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (editor) {

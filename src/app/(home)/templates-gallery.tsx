@@ -32,7 +32,7 @@ export const TemplatesGallery = ({ showPersonal = false }: TemplatesGalleryProps
       
       toast.success("Document created");
       router.push(`/documents/${documentId}`);
-    } catch (error) {
+    } catch {
       toast.error("Failed to create document");
       setIsCreating(false);
     }

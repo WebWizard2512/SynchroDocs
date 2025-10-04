@@ -15,24 +15,17 @@ interface DocumentProps {
 
 export const Document = ({ preloadedDocument }: DocumentProps) => {
     const router = useRouter();
-    const [error, setError] = useState(false);
-    
-    let document;
-    try {
-        document = usePreloadedQuery(preloadedDocument);
-    } catch (err) {
-        if (!error) {
-            setError(true);
-        }
-    }
-    
+    const [hasError, setHasError] = useState(false);
+    const document = usePreloadedQuery(preloadedDocument);
+
     useEffect(() => {
-        if (error) {
+        if (!document || hasError) {
+            setHasError(true);
             router.replace('/');
         }
-    }, [error, router]);
-    
-    if (error || !document) {
+    }, [document, hasError, router]);
+
+    if (!document || hasError) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center space-y-4">
@@ -42,7 +35,7 @@ export const Document = ({ preloadedDocument }: DocumentProps) => {
             </div>
         );
     }
-    
+
     return (
         <Room>
             <div className="min-h-screen bg-[#FAFBFD]">
@@ -55,5 +48,5 @@ export const Document = ({ preloadedDocument }: DocumentProps) => {
                 </div>
             </div>
         </Room>
-    )
-}
+    );
+};

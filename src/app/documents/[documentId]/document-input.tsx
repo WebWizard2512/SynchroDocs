@@ -40,7 +40,7 @@ export const DocumentInput = ({ title, id }: DocumentInputProps) => {
       try {
         await mutate({ id, title: trimmedValue });
         lastSavedTitleRef.current = trimmedValue;
-      } catch (error) {
+      } catch {
         toast.error("Failed to update document");
         setValue(lastSavedTitleRef.current);
       } finally {
@@ -78,7 +78,7 @@ export const DocumentInput = ({ title, id }: DocumentInputProps) => {
       lastSavedTitleRef.current = trimmedValue;
       toast.success("Document renamed");
       setIsEditing(false);
-    } catch (error) {
+    } catch {
       toast.error("Failed to update document");
       setValue(lastSavedTitleRef.current);
     } finally {

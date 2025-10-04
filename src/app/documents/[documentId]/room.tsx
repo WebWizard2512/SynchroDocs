@@ -41,7 +41,7 @@ export function Room({ children }: { children: ReactNode }) {
     try {
       const list = await getUsers();
       setUsers(list);
-    } catch (error) {
+    } catch {
       setUsers([]);
     }
   }, []);
@@ -87,7 +87,7 @@ export function Room({ children }: { children: ReactNode }) {
         id: document.id,
         name: document.title || document.name,
       }));
-    } catch (error) {
+    } catch {
       return [];
     }
   }, []);
@@ -132,13 +132,13 @@ export function Room({ children }: { children: ReactNode }) {
       const data = await response.json();
       setAuthError(null);
       return data;
-    } catch (error) {
+    } catch {
       if (!authError) {
         setAuthError("Failed to connect. Please refresh the page.");
         toast.error("Connection failed");
       }
       
-      throw error;
+      throw new Error("Connection failed");
     }
   }, [params.documentId, router, authError]);
 

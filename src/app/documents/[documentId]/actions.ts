@@ -41,7 +41,7 @@ export async function getUsers() {
                         }
                         const user = await clerk.users.getUser(member.publicUserData.userId);
                         return user;
-                    } catch (error) {
+                    } catch {
                         return null;
                     }
                 });
@@ -53,7 +53,7 @@ export async function getUsers() {
                         allUsersMap.set(user.id, user);
                     }
                 });
-            } catch (orgError) {
+            } catch {
                 // Silently continue
             }
         }
@@ -93,7 +93,7 @@ export async function getUsers() {
                         continue;
                     }
                 }
-            } catch (error) {
+            } catch {
                 // Silently continue
             }
         }
@@ -113,7 +113,7 @@ export async function getUsers() {
         });
         
         return users;
-    } catch (error) {
+    } catch {
         return [];
     }
 }
